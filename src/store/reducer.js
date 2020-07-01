@@ -14,7 +14,6 @@ const initialState = {
   totalPages: 0,
   searchText: '',
   currentPosts: [],
-  orgCurrentPosts: [],
   selectedPage: -1,
   filteredPost: [],
   currentActivePage: 1,
@@ -32,7 +31,6 @@ const reducer = (state = initialState, { type, payload }) => {
       let totalPages = state.totalPages + 1;
       let selectedPage = state.selectedPage;
       let currentPosts = [];
-      let orgCurrentPosts = [];
 
       let currentActivePage = 1;
       if (selectedPage > -1) {
@@ -40,17 +38,14 @@ const reducer = (state = initialState, { type, payload }) => {
       }
       if (!state.currentPosts.length) {
         currentPosts = payload.hits;
-        orgCurrentPosts = payload.hits;
       } else {
         currentPosts = state.currentPosts;
-        orgCurrentPosts = state.currentPosts;
       }
       return {
         ...state,
         totalPages,
         selectedPage,
         currentPosts,
-        orgCurrentPosts,
         currentActivePage,
         pageNo: payload.page,
         posts: [...state.posts, ...payload.hits],
@@ -86,21 +81,28 @@ const reducer = (state = initialState, { type, payload }) => {
         selectedPage: payload,
         currentPosts: Updateposts,
         currentActivePage: payload,
-        orgCurrentPosts: Updateposts,
       };
     }
 
     case SEARCH_RESULTS: {
-      const searchText = payload;
-      const { orgCurrentPosts } = state;
-      const tmpData = [...orgCurrentPosts];
-      const filteredPost = tmpData.filter((data) =>
-        data.title.toLowerCase().includes(searchText.toLowerCase())
-      );
+      const searchText = payload.toLowerCase().trim();
+      let filteredPost = [];
+      const selectedPage = state.selectedPage;
+          const startIndex = selectedPage > -1 ? (selectedPage - 1) * 20 : (state.currentActivePage - 1) * 20;
+          const endIndex = startIndex + 20;
+          filteredPost = state.posts.slice(startIndex, endIndex);
+
+      const UpdatedData = filteredPost.filter(post => {
+                const title = post.title.toLowerCase();
+                const url = post.url ? post.url.toLowerCase() : '';
+                const author = post.author.toLowerCase();
+                return title.includes(searchText) || url.includes(searchText) || author.includes(searchText);
+            });
+            
       return {
-        ...state,
-        searchText: payload,
-        currentPosts: filteredPost,
+          ...state,
+          searchText: payload,
+          currentPosts: UpdatedData
       };
     }
 

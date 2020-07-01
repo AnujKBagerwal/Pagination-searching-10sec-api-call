@@ -1,0 +1,7 @@
+export const GET_API_LIST = 'GET_API_LIST';
+export const SET_API_LIST = 'SET_API_LIST';
+export const UPDATE_API_LIST = 'UPDATE_API_LIST';
+export const UPDATE_PAGINATION = 'UPDATE_PAGINATION';
+export const SEARCH_RESULTS = 'SEARCH_RESULTS';
+
+export const ERROR_API_LIST = 'ERROR_API_LIST';

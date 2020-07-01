@@ -14,6 +14,7 @@ const initialState = {
   totalPages: 0,
   searchText: '',
   currentPosts: [],
+  orgCurrentPosts: [],
   selectedPage: -1,
   filteredPost: [],
   currentActivePage: 1,
@@ -31,23 +32,28 @@ const reducer = (state = initialState, { type, payload }) => {
       let totalPages = state.totalPages + 1;
       let selectedPage = state.selectedPage;
       let currentPosts = [];
+      let orgCurrentPosts = [];
+
       let currentActivePage = 1;
       if (selectedPage > -1) {
         currentActivePage = selectedPage;
       }
       if (!state.currentPosts.length) {
         currentPosts = payload.hits;
+        orgCurrentPosts = payload.hits;
       } else {
         currentPosts = state.currentPosts;
+        orgCurrentPosts = state.currentPosts;
       }
       return {
         ...state,
-        posts: [...state.posts, ...payload.hits],
-        pageNo: payload.page,
-        currentActivePage,
         totalPages,
         selectedPage,
         currentPosts,
+        orgCurrentPosts,
+        currentActivePage,
+        pageNo: payload.page,
+        posts: [...state.posts, ...payload.hits],
       };
     }
 
@@ -76,36 +82,21 @@ const reducer = (state = initialState, { type, payload }) => {
       console.log('posts', Updateposts);
       return {
         ...state,
-        selectedPage: payload,
-        currentActivePage: payload,
-        currentPosts: Updateposts,
         searchText: '',
+        selectedPage: payload,
+        currentPosts: Updateposts,
+        currentActivePage: payload,
+        orgCurrentPosts: Updateposts,
       };
     }
 
     case SEARCH_RESULTS: {
-      const searchText = payload.toLowerCase().trim();
-      let filteredPost = [];
-      if (
-        state.currentPosts &&
-        state.currentPosts.length &&
-        searchText.length
-      ) {
-        filteredPost = state.currentPosts.filter((post) => {
-          const title = post.title.toLowerCase();
-          return title.includes(searchText);
-        });
-      }
-
-      if (!searchText.length) {
-        const selectedPage = state.selectedPage;
-        const startIndex =
-          selectedPage > -1
-            ? (selectedPage - 1) * 20
-            : (state.currentActivePage - 1) * 20;
-        const endIndex = startIndex + 20;
-        filteredPost = state.posts.slice(startIndex, endIndex);
-      }
+      const searchText = payload;
+      const { orgCurrentPosts } = state;
+      const tmpData = [...orgCurrentPosts];
+      const filteredPost = tmpData.filter((data) =>
+        data.title.toLowerCase().includes(searchText.toLowerCase())
+      );
       return {
         ...state,
         searchText: payload,
